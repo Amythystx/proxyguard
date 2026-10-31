@@ -1,11 +1,13 @@
 const express  = require('express');
 const mongoose = require('mongoose');
+const path     = require('path');
+const fs       = require('fs');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 
-// Startup security checks: Validate JWT_SECRET
+// Startup security checks: Validate JWT_SECRET and NODE_ENV
 const isProduction = process.env.NODE_ENV === 'production';
 if (!process.env.JWT_SECRET) {
   if (isProduction) {
@@ -19,15 +21,73 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
-// Serve static frontend files from /public
-app.use(express.static('public'));
+// Static frontend paths
+const publicDir = path.join(__dirname, 'public');
+const indexHtmlPath = path.join(publicDir, 'index.html');
 
-// Serve html5-qrcode library to the browser at /lib
-app.use('/lib', express.static('node_modules/html5-qrcode'));
+// Serve static frontend files from /public in development.
+// In production on Vercel, static assets in public/ are served directly by Vercel CDN.
+if (!isProduction) {
+  app.use(express.static(publicDir));
+  app.use('/lib', express.static(path.join(__dirname, 'node_modules/html5-qrcode')));
+}
+
+// ── Database Connection & Lifecycle (Serverless-friendly) ──────────────────
+let cachedConnectionPromise = null;
+
+async function connectToDatabase() {
+  // readyState: 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  if (mongoose.connection.readyState === 1) {
+    return mongoose;
+  }
+  if (mongoose.connection.readyState === 2 && cachedConnectionPromise) {
+    return cachedConnectionPromise;
+  }
+
+  const mongoUri = process.env.MONGO_URI;
+  if (!mongoUri) {
+    if (isProduction) {
+      console.error('CRITICAL: MONGO_URI environment variable is missing in production.');
+    } else {
+      console.warn('⚠️ Warning: MONGO_URI environment variable is not set in environment variables.');
+    }
+    return null;
+  }
+
+  cachedConnectionPromise = mongoose.connect(mongoUri, {
+    bufferCommands: false,
+  }).catch((err) => {
+    cachedConnectionPromise = null;
+    throw err;
+  });
+
+  return cachedConnectionPromise;
+}
+
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected successfully');
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB connection lost. API requests will return 503 until reconnected.');
+  cachedConnectionPromise = null;
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err.message);
+});
 
 // Database availability gate for API routes
 // Rejects requests immediately if MongoDB is not connected, avoiding hung requests / buffer timeouts
-app.use('/api', (req, res, next) => {
+app.use('/api', async (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await connectToDatabase();
+    } catch (err) {
+      // Error will be logged by connectToDatabase or connection event listeners
+    }
+  }
+
   // readyState: 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
@@ -54,31 +114,17 @@ app.use('/api', (req, res) => {
   res.status(404).json({ message: 'API endpoint not found' });
 });
 
-// ── Database Lifecycle ─────────────────────────────────────────────────────
-mongoose.connection.on('connected', () => {
-  console.log('MongoDB connected successfully');
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.warn('MongoDB connection lost. API requests will return 503 until reconnected.');
-});
-
-mongoose.connection.on('error', (err) => {
-  console.error('MongoDB connection error:', err.message);
-});
-
-const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/proxyguard';
-mongoose.connect(mongoUri).catch((err) => {
-  console.error('Initial MongoDB connection failed:', err.message);
-  console.error('API endpoints requiring database access will return 503 until connection is established.');
-});
-
 // Catch-all: unknown GET routes serve index.html for SPA routing (exclude /api routes)
 app.get('/*path', (req, res) => {
   if (req.path === '/api' || req.path.startsWith('/api/')) {
     return res.status(404).json({ message: 'API endpoint not found' });
   }
-  res.sendFile('index.html', { root: 'public' });
+  // In production on Vercel, static pages are served directly by Vercel CDN.
+  // If the file exists on disk, serve it; otherwise safely skip/return 404.
+  if (fs.existsSync(indexHtmlPath)) {
+    return res.sendFile(indexHtmlPath);
+  }
+  res.status(404).send('Not Found');
 });
 
 // ── Centralized Express JSON Error Handler ──────────────────────────────────
@@ -97,7 +143,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  connectToDatabase().catch((err) => {
+    console.error('Initial MongoDB connection failed:', err.message);
+    console.error('API endpoints requiring database access will return 503 until connection is established.');
+  });
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

@@ -105,6 +105,62 @@
 
 ---
 
+## Deployment to Vercel (Zero-Config Express)
+
+ProxyGuard is configured for zero-config serverless deployment on [Vercel](https://vercel.com/):
+- **Zero-Config Routing**: Vercel automatically detects `server.js` at the repository root and routes `/api/*` requests to a serverless fluid compute function without requiring a `vercel.json` file.
+- **Edge CDN Static Serving**: All assets in `public/` (`index.html`, `student.html`, `teacher.html`, `admin.html`, `reports.html`, CSS, icons, and `/lib/html5-qrcode.min.js`) are served directly by Vercel's global CDN edge network with automatic caching.
+- **Serverless Connection Pooling**: MongoDB connection promises are cached across container invocations, eliminating cold-start connection latency while preserving the 503 database availability gate when unreachable.
+
+### 1. Database Setup (MongoDB Atlas)
+Because Vercel serverless functions run in ephemeral containers across dynamic IP addresses, production requires a cloud-hosted database such as [MongoDB Atlas](https://www.mongodb.com/cloud/atlas):
+1. In MongoDB Atlas, go to **Network Access** and add `0.0.0.0/0` (Allow Access from Anywhere) to permit connections from Vercel's serverless IP ranges.
+2. In **Database Access**, create a database user and record the username and password.
+3. In **Database Deployments**, click **Connect** → **Drivers** (Node.js) and copy the connection string:
+   ```
+   mongodb+srv://<username>:<password>@cluster.mongodb.net/proxyguard?retryWrites=true&w=majority
+   ```
+
+### 2. Seed the Admin User (One-time)
+Run the seed script locally against your Atlas cluster before first login:
+```bash
+MONGO_URI="mongodb+srv://<username>:<password>@cluster.mongodb.net/proxyguard?retryWrites=true&w=majority" ADMIN_EMAIL="admin@college.edu" ADMIN_PASSWORD="your_strong_password" node createAdmin.js
+```
+
+### 3. Deploy to Vercel
+
+#### Option A: Via Vercel Web Dashboard (Recommended)
+1. Push your repository to GitHub, GitLab, or Bitbucket.
+2. Log into [vercel.com](https://vercel.com/) and click **Add New...** → **Project**.
+3. Import the `proxyguard` repository.
+4. Under **Environment Variables**, configure the following variables:
+   - `MONGO_URI`: `mongodb+srv://<username>:<password>@cluster.mongodb.net/proxyguard?retryWrites=true&w=majority`
+   - `JWT_SECRET`: A secure random string of at least 16 characters (e.g. generated via `openssl rand -hex 32`)
+   - `NODE_ENV`: `production`
+5. Click **Deploy**.
+
+#### Option B: Via Vercel CLI
+1. Install the Vercel CLI:
+   ```bash
+   npm i -g vercel
+   ```
+2. Run deployment from the project root:
+   ```bash
+   vercel
+   ```
+3. Set the environment variables in the project settings or via CLI:
+   ```bash
+   vercel env add MONGO_URI production
+   vercel env add JWT_SECRET production
+   vercel env add NODE_ENV production
+   ```
+4. Deploy to production:
+   ```bash
+   vercel --prod
+   ```
+
+---
+
 ## Automated Security Tests
 
 ProxyGuard includes a non-destructive unit test suite verifying core security primitives:
