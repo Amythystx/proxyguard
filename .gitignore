@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+node_modules - Copy*/
+
+# Environment configurations
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+
+# Local backups and Windows copy duplicates
+* - Copy*
+*-Copy*
+- Copy*
+*.bak
+*.backup
+*.proxyguard-backup
+server.js.proxyguard-backup
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+desktop.ini

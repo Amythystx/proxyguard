@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ProxyGuard — Student Dashboard</title>
+  <meta name="description" content="ProxyGuard student dashboard — scan QR codes, view attendance heatmaps, calendar, and low attendance alerts.">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <!-- Accessible Skip Navigation Link -->
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" role="complementary" aria-label="Navigation">
+    <div class="sidebar-inner">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.2 3.8 10 9 11 5.2-1 9-5.8 9-11V7L12 2z"/><path d="M9 12l2 2 4-4" stroke-width="2.5"/></svg>
+        </div>
+        <div class="brand-text">ProxyGuard <span>Smart Attendance</span></div>
+      </div>
+
+      <span class="nav-section">Portal</span>
+      <nav aria-label="Student navigation">
+        <a href="student.html" class="active">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          My Attendance
+        </a>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="sidebar-user-info">
+          <div class="sidebar-avatar" id="sidebarAvatar">S</div>
+          <div>
+            <div class="sidebar-name" id="sidebarName">Student</div>
+            <div class="sidebar-role" id="sidebarRole">Student</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="mainContent">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="breadcrumb"><span>ProxyGuard</span><span>Student</span></div>
+        <div class="topbar-title">Student Attendance Portal</div>
+      </div>
+      <div class="topbar-right">
+        <!-- In-app Notification Bell and PWA Install Prompt mount here -->
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Low Attendance Alert Banner (<75%) -->
+      <div id="lowAttendanceAlert" class="alert-banner alert-danger hidden" role="alert">
+        <div class="alert-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="alert-content">
+          <div class="alert-title-row">
+            <span class="alert-title" id="alertTitle">Action Required: Low Attendance Warning</span>
+            <span class="pill pill-danger" id="alertBadge">Below 75%</span>
+          </div>
+          <div class="alert-subtitle" id="alertSubtitle">One or more enrolled subjects fall below the mandatory 75% attendance threshold:</div>
+          <div class="alert-cards-grid" id="alertCardsList"></div>
+        </div>
+      </div>
+
+      <!-- Top Four Summary Cards -->
+      <div class="summary-stat-cards">
+        <div class="summary-stat-card">
+          <div class="stat-icon-circle stat-icon-blue">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-val" id="statOverallPct">—</div>
+            <div class="stat-desc">Overall Attendance %</div>
+          </div>
+        </div>
+
+        <div class="summary-stat-card">
+          <div class="stat-icon-circle stat-icon-amber">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-val" id="statLowCount">—</div>
+            <div class="stat-desc">Subjects Below 75%</div>
+          </div>
+        </div>
+
+        <div class="summary-stat-card">
+          <div class="stat-icon-circle stat-icon-green">
+            <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-val" id="statTotalScans">—</div>
+            <div class="stat-desc">Total Sessions Attended</div>
+          </div>
+        </div>
+
+        <div class="summary-stat-card">
+          <div class="stat-icon-circle stat-icon-purple">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-val" id="statLastScan" style="font-size:15px;font-weight:700;">—</div>
+            <div class="stat-desc">Last Scan Time</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Grid: QR Scanner (Left) & Subject Attendance Progress (Right) -->
+      <div class="scanner-grid">
+
+        <!-- Scanner Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Classroom QR Camera Scanner
+            </div>
+            <span class="pill pill-live">Anti-Proxy Verified</span>
+          </div>
+          <div class="panel-body">
+            <!-- Viewfinder Frame with Camera Placeholder & Loading State -->
+            <div class="scanner-frame" id="scannerFrame">
+              <div id="reader" role="img" aria-label="QR code scanner viewfinder"></div>
+
+              <div id="scannerPlaceholder" class="scanner-placeholder">
+                <div class="scanner-icon-circle">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
+                <div class="scanner-placeholder-title">Camera Scanner Ready</div>
+                <p class="scanner-placeholder-desc">Click <strong>Start Camera</strong> below to scan the rotating QR code on your teacher's screen.</p>
+                <div class="scanner-security-note">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span>Dynamic HMAC Signature &amp; Geo-fence Checked</span>
+                </div>
+              </div>
+
+              <div id="scannerLoading" class="scanner-loading-state hidden">
+                <div class="scanner-spinner"></div>
+                <div style="font-weight:700;font-size:14px;">Accessing Camera…</div>
+                <p style="font-size:12px;color:var(--slate-400);">Please allow camera permissions if prompted</p>
+              </div>
+            </div>
+
+            <div id="result" class="scan-result" role="status" aria-live="assertive"></div>
+
+            <div style="display:flex;gap:10px;margin-bottom:12px;">
+              <button class="btn btn-primary" id="startBtn" onclick="startScan()" style="flex:1;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M5 5s1.5 1 7 1 7-1 7-1M5 19s1.5-1 7-1 7 1 7 1M5 5v14M19 5v14"/></svg>
+                Start Camera
+              </button>
+              <button class="btn btn-danger hidden" id="stopBtn" onclick="stopScan()" style="flex:1;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                Stop Camera
+              </button>
+            </div>
+
+            <p class="hint">
+              Point your camera directly at your teacher's live QR code. QR tokens rotate every 20 seconds.
+            </p>
+          </div>
+        </div>
+
+        <!-- Subject Attendance & Exam Eligibility Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Subject Attendance &amp; Exam Eligibility
+            </div>
+            <span class="badge">75% Mandatory</span>
+          </div>
+          <div class="panel-body" id="summaryBody">
+            <p class="hint" style="text-align:center;padding:24px 0;">Loading subject attendance summary…</p>
+          </div>
+        </div>
+
+      </div><!-- /scanner-grid -->
+
+      <!-- Side-by-Side: Compact Calendar (Left) & Full-Width Heatmap (Right) -->
+      <div class="grid-2col">
+
+        <!-- Compact Monthly Interactive Calendar -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Attendance Calendar
+            </div>
+            <div class="cal-nav">
+              <button class="cal-nav-btn" id="calPrevBtn" aria-label="Previous Month">&lsaquo;</button>
+              <span id="calMonthLabel" class="cal-month-name"></span>
+              <button class="cal-nav-btn" id="calNextBtn" aria-label="Next Month">&rsaquo;</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div id="calDayDetails" class="cal-day-details hidden"></div>
+          </div>
+        </div>
+
+        <!-- Attendance Activity Heatmap -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="10" y="17" width="4" height="4"/><rect x="17" y="17" width="4" height="4"/></svg>
+              Attendance Heatmap
+            </div>
+            <span class="badge" id="totalDaysBadge">0 Active Days</span>
+          </div>
+          <div class="panel-body">
+            <div class="heatmap-container" id="heatmapContainer">
+              <div class="heatmap-grid" id="heatmapGrid"></div>
+            </div>
+            <div class="heatmap-legend">
+              <span>Less</span>
+              <div class="heatmap-cell level-0"></div>
+              <div class="heatmap-cell level-1"></div>
+              <div class="heatmap-cell level-2"></div>
+              <div class="heatmap-cell level-3"></div>
+              <div class="heatmap-cell level-4"></div>
+              <span>More</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /grid-2col -->
+
+      <!-- Attendance History Log Table -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Personal Attendance Log
+          </div>
+          <span class="badge" id="count" aria-label="Attendance records count">0</span>
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <div class="table-wrapper" style="border:none;max-height:360px;overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Marked At</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="historyRows">
+                <tr><td colspan="3" class="hint" style="text-align:center;padding:24px;">Loading records…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <script src="/lib/html5-qrcode.min.js"></script>
+  <script src="common.js"></script>
+  <script src="student.js"></script>
+</body>
+</html>

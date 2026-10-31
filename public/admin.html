@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ProxyGuard — Administrator Command Center</title>
+  <meta name="description" content="ProxyGuard admin command center — user management, security audit logs, platform analytics, and at-risk student monitoring.">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <!-- Accessible Skip Navigation Link -->
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" role="complementary" aria-label="Navigation">
+    <div class="sidebar-inner">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.2 3.8 10 9 11 5.2-1 9-5.8 9-11V7L12 2z"/><path d="M9 12l2 2 4-4" stroke-width="2.5"/></svg>
+        </div>
+        <div class="brand-text">ProxyGuard <span>Smart Attendance</span></div>
+      </div>
+
+      <span class="nav-section">Administration</span>
+      <nav aria-label="Admin navigation">
+        <a href="admin.html" class="active">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Command Center
+        </a>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="sidebar-user-info">
+          <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+          <div>
+            <div class="sidebar-name" id="sidebarName">Admin</div>
+            <div class="sidebar-role" id="sidebarRole">Administrator</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="mainContent">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="breadcrumb"><span>ProxyGuard</span><span>Admin</span></div>
+        <div class="topbar-title">Institutional Command Center</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-outline btn-sm" onclick="init()" id="refreshBtn" title="Refresh data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Platform Stat Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon stat-blue">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div class="stat-num" id="statStudents">—</div>
+            <div class="stat-label">Enrolled Students</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon stat-purple">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div>
+            <div class="stat-num" id="statTeachers">—</div>
+            <div class="stat-label">Faculty Members</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon stat-cyan">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          </div>
+          <div>
+            <div class="stat-num" id="statSubjects">—</div>
+            <div class="stat-label">Registered Subjects</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon stat-yellow">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div class="stat-num" id="statSessions">—</div>
+            <div class="stat-label">Total Sessions</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon stat-green">
+            <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <div>
+            <div class="stat-num" id="statAttendance">—</div>
+            <div class="stat-label">Verified Scans</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon stat-red">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div class="stat-num" id="statAlerts">—</div>
+            <div class="stat-label">Security Alerts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="tab-row" role="tablist">
+        <button id="tabUsers" class="tab-btn active" role="tab" onclick="switchAdminTab('users')">User Directory</button>
+        <button id="tabAudit" class="tab-btn" role="tab" onclick="switchAdminTab('audit')">Security Audit Logs</button>
+        <button id="tabAtRisk" class="tab-btn" role="tab" onclick="switchAdminTab('atRisk')">At-Risk Students (&lt;75%)</button>
+      </div>
+
+      <!-- TAB 1: Users Directory -->
+      <div id="panelUsers" class="panel tab-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            Registered Users Directory
+          </div>
+          <span class="badge" id="userCount" aria-label="Total users">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:16px;">
+            <input id="searchInput" type="search" placeholder="Search users by full name or institutional email…"
+                   oninput="filterUsers()" aria-label="Search users" autocomplete="off">
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Institutional Email</th>
+                  <th>Assigned Role</th>
+                  <th>Registration Date</th>
+                  <th>Management Action</th>
+                </tr>
+              </thead>
+              <tbody id="userRows">
+                <tr><td colspan="5" class="hint" style="text-align:center;padding:28px;">Loading directory…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p id="msg" class="msg-bar" aria-live="polite" style="margin-top:12px;"></p>
+        </div>
+      </div>
+
+      <!-- TAB 2: Security Audit Logs -->
+      <div id="panelAudit" class="panel tab-panel hidden">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Security Audit Trail &amp; Anti-Proxy Forensic Logs
+          </div>
+          <span class="badge badge-danger" id="auditCount">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="audit-filters-row">
+            <div style="flex:1;min-width:220px;">
+              <input id="auditSearchInput" type="search" placeholder="Search by email, IP address, or event details…" oninput="loadAuditLogs()">
+            </div>
+            <div style="width:160px;">
+              <select id="auditSeverityFilter" onchange="loadAuditLogs()" aria-label="Filter by severity">
+                <option value="all">All Severities</option>
+                <option value="critical">Critical Only</option>
+                <option value="warning">Warning Only</option>
+                <option value="info">Info Only</option>
+              </select>
+            </div>
+            <div style="width:190px;">
+              <select id="auditEventFilter" onchange="loadAuditLogs()" aria-label="Filter by event type">
+                <option value="all">All Events</option>
+                <option value="SCAN_GEO_FAIL">Geo-fence Breaches</option>
+                <option value="SCAN_TAMPER_SIG">HMAC Tampering</option>
+                <option value="SCAN_DUPLICATE">Duplicate Scans</option>
+                <option value="SCAN_EXPIRED_QR">Expired QR Replays</option>
+                <option value="LOGIN_FAILED">Failed Logins</option>
+                <option value="SCAN_SUCCESS">Valid Scans</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrapper" style="margin-top:16px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Severity</th>
+                  <th>Event Name</th>
+                  <th>User / Email</th>
+                  <th>IP Address</th>
+                  <th>Forensic Audit Details</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="auditRows">
+                <tr><td colspan="6" class="hint" style="text-align:center;padding:32px;">Loading security audit logs…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Institution-Wide At-Risk Students -->
+      <div id="panelAtRisk" class="panel tab-panel hidden">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Institution-Wide Low Attendance (&lt;75% Threshold)
+          </div>
+          <span class="badge badge-danger" id="adminAtRiskCount">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Institutional Email</th>
+                  <th>Course Subject</th>
+                  <th>Attendance %</th>
+                  <th>Consecutive Needed</th>
+                  <th>Risk Level</th>
+                </tr>
+              </thead>
+              <tbody id="adminAtRiskRows">
+                <tr><td colspan="6" class="hint" style="text-align:center;padding:32px;">Loading at-risk records…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <script src="common.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

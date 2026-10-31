@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ProxyGuard — Smart Attendance &amp; Anti-Proxy System</title>
+  <meta name="description" content="ProxyGuard — QR-based smart attendance tracking with mathematical anti-proxy protection for modern classrooms.">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="auth-split-wrapper" role="main">
+
+    <!-- Left: Branded Hero Showcase -->
+    <div class="auth-brand-side">
+      <div>
+        <div class="brand-hero-header">
+          <div class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2L3 7v6c0 5.2 3.8 10 9 11 5.2-1 9-5.8 9-11V7L12 2z"/>
+              <path d="M9 12l2 2 4-4" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div class="brand-hero-title">ProxyGuard</div>
+        </div>
+
+        <h1 class="brand-hero-headline">
+          Smart Attendance with <span>Anti-Proxy Protection</span>
+        </h1>
+        <p class="brand-hero-sub">
+          Cryptographically signed, rotating QR codes and classroom geo-fencing ensure 100% genuine student attendance.
+        </p>
+
+        <div class="security-features-list">
+          <div class="sec-item">
+            <div class="sec-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </div>
+            <div class="sec-text">
+              <span class="sec-title">HMAC-SHA256 Signed QRs</span>
+              <span class="sec-desc">30-second rotating cryptographic tokens eliminate screenshot forwarding</span>
+            </div>
+          </div>
+
+          <div class="sec-item">
+            <div class="sec-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/></svg>
+            </div>
+            <div class="sec-text">
+              <span class="sec-title">Classroom Geo-fencing</span>
+              <span class="sec-desc">Real-time GPS validation prevents off-campus attendance proxy</span>
+            </div>
+          </div>
+
+          <div class="sec-item">
+            <div class="sec-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="sec-text">
+              <span class="sec-title">75% Examination Eligibility</span>
+              <span class="sec-desc">Automatic attendance heatmaps, shortfall warnings, and audit logs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-footer-pill">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Zero-Proxy Guaranteed • Offline-First PWA</span>
+      </div>
+    </div>
+
+    <!-- Right: Auth Form Container -->
+    <div class="auth-form-side">
+      <div class="auth-form-header">
+        <h2 class="auth-form-title" id="authFormTitle">Sign in to your portal</h2>
+        <p class="auth-form-desc" id="authFormDesc">Enter your institutional credentials to access your dashboard</p>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="tab-row" role="tablist">
+        <button id="tabLogin" class="tab-btn active" role="tab" aria-selected="true"
+                aria-controls="loginBox" onclick="showTab('login')">Sign In</button>
+        <button id="tabRegister" class="tab-btn" role="tab" aria-selected="false"
+                aria-controls="registerBox" onclick="showTab('register')">Register</button>
+      </div>
+
+      <!-- Login form -->
+      <div id="loginBox" role="tabpanel" aria-labelledby="tabLogin">
+        <div class="field">
+          <label for="loginEmail">Email address</label>
+          <input id="loginEmail" type="email" placeholder="you@college.edu" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <div class="input-wrap">
+            <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" required>
+            <button type="button" class="pwd-toggle-btn" id="loginPwdToggle" onclick="togglePasswordVisibility('loginPassword', 'loginPwdToggle')" aria-label="Toggle password visibility">
+              <svg class="eye-open" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-closed hidden" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <button id="loginBtn" class="btn-submit" onclick="login()">Sign In</button>
+      </div>
+
+      <!-- Register form -->
+      <div id="registerBox" class="hidden" role="tabpanel" aria-labelledby="tabRegister">
+        <div class="field">
+          <label for="regName">Full name</label>
+          <input id="regName" type="text" placeholder="e.g. Arjun Sharma" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="regEmail">Email address</label>
+          <input id="regEmail" type="email" placeholder="you@college.edu" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="regPassword">Password</label>
+          <div class="input-wrap">
+            <input id="regPassword" type="password" placeholder="Min 6 characters" autocomplete="new-password" required>
+            <button type="button" class="pwd-toggle-btn" id="regPwdToggle" onclick="togglePasswordVisibility('regPassword', 'regPwdToggle')" aria-label="Toggle password visibility">
+              <svg class="eye-open" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-closed hidden" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="regRole">Select role</label>
+          <select id="regRole">
+            <option value="student">Student</option>
+            <option value="teacher">Teacher (Faculty)</option>
+          </select>
+        </div>
+        <button id="registerBtn" class="btn-submit" onclick="register()">Create Account</button>
+      </div>
+
+      <p id="msg" aria-live="polite"></p>
+    </div>
+
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>
