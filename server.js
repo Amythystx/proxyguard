@@ -111,6 +111,13 @@ app.use('/api', (req, res) => {
   res.status(404).json({ message: 'API endpoint not found' });
 });
 
+app.get('/', (req, res) => {
+  if (fs.existsSync(indexHtmlPath)) {
+    return res.sendFile(indexHtmlPath);
+  }
+  res.send('ProxyGuard API is running successfully!');
+});
+
 // Catch-all: unknown GET routes serve index.html for SPA routing (exclude /api routes)
 app.get('/{*path}', (req, res) => {
   if (req.path === '/api' || req.path.startsWith('/api/')) {
