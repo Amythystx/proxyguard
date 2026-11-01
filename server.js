@@ -25,12 +25,9 @@ if (!process.env.JWT_SECRET) {
 const publicDir = path.join(__dirname, 'public');
 const indexHtmlPath = path.join(publicDir, 'index.html');
 
-// Serve static frontend files from /public in development.
-// In production on Vercel, static assets in public/ are served directly by Vercel CDN.
-if (!isProduction) {
-  app.use(express.static(publicDir));
-  app.use('/lib', express.static(path.join(__dirname, 'node_modules/html5-qrcode')));
-}
+// Serve static frontend files from /public and html5-qrcode library
+app.use(express.static(publicDir));
+app.use('/lib', express.static(path.join(__dirname, 'node_modules/html5-qrcode')));
 
 // ── Database Connection & Lifecycle (Serverless-friendly) ──────────────────
 let cachedConnectionPromise = null;
@@ -115,12 +112,10 @@ app.use('/api', (req, res) => {
 });
 
 // Catch-all: unknown GET routes serve index.html for SPA routing (exclude /api routes)
-app.get('/*path', (req, res) => {
+app.get('/{*path}', (req, res) => {
   if (req.path === '/api' || req.path.startsWith('/api/')) {
     return res.status(404).json({ message: 'API endpoint not found' });
   }
-  // In production on Vercel, static pages are served directly by Vercel CDN.
-  // If the file exists on disk, serve it; otherwise safely skip/return 404.
   if (fs.existsSync(indexHtmlPath)) {
     return res.sendFile(indexHtmlPath);
   }
