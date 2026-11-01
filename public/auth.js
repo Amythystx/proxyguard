@@ -189,3 +189,78 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THEME MANAGEMENT (Dark / Light Mode)
+// ─────────────────────────────────────────────────────────────────────────────
+function getStoredTheme() {
+  try {
+    return localStorage.getItem('pg-theme');
+  } catch (e) {
+    return null;
+  }
+}
+
+function setStoredTheme(theme) {
+  try {
+    localStorage.setItem('pg-theme', theme);
+  } catch (e) {}
+}
+
+function getSystemTheme() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function getCurrentTheme() {
+  return document.documentElement.getAttribute('data-theme') || getStoredTheme() || getSystemTheme();
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  setStoredTheme(theme);
+
+  const metaTheme = document.getElementById('metaThemeColor') || document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', theme === 'dark' ? '#0b1220' : '#1e3a8a');
+  }
+
+  updateThemeToggleUI(theme);
+}
+
+function toggleTheme() {
+  const current = getCurrentTheme();
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+}
+
+function updateThemeToggleUI(theme) {
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) {
+    const isDark = theme === 'dark';
+    btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    btn.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+}
+
+function initTheme() {
+  const theme = getStoredTheme() || getSystemTheme();
+  applyTheme(theme);
+
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) {
+    btn.onclick = e => {
+      e.stopPropagation();
+      toggleTheme();
+    };
+  }
+
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!getStoredTheme()) {
+        applyTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initTheme);

@@ -1,5 +1,5 @@
 // sw.js — ProxyGuard Service Worker
-const CACHE_NAME = 'proxyguard-v1.3';
+const CACHE_NAME = 'proxyguard-v1.4';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
